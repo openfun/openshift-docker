@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+
+source "$(dirname "${BASH_SOURCE[0]}")/_utils.sh"
+
+
+function usage() {
+    declare script_name="$0"
+
+    echo "$script_name [-h|--help] SERVICE"
+    echo
+    echo "Options:"
+    echo "  -h|--help      : Display this help message"
+    echo
+    echo "Arguments:"
+    echo "  SERVICE: the name of the service to publish (e.g. nginx)"
+}
+
+
+# Publish service image to dockerhub
+#
+# Usage: publish SERVICE
+function publish() {
+    if [[ -z $1 ]]; then
+        echo "publish: service name is missing, see usage."
+        exit 1
+    fi
+    local service=$1
+    local tag=$(_get_target_image_tag $service)
+
+    echo -e "\033[34m**** PUBLISH PARAMETERS ****"
+    echo "Service: ${service}"
+    echo "Image:   ${tag}"
+    echo -e "**************************\033[0m"
+
+    _check_target_image_exists $service
+    docker push $tag
+}
+
+
+function main() {
+    declare program="$0"
+
+    local service
+
+    while [[ "$#" -ge "1" ]]; do
+        local key="$1"
+        shift
+
+        case "$key" in
+            -h|--help|help)
+                usage "$program"
+                exit 0
+                ;;
+            *)
+                # Check if $key is a service name with a defined Dockerfile
+                _check_service_image_path $key
+                service=$key
+        esac
+    done
+
+    publish $service
+}
+
+main "$@"
