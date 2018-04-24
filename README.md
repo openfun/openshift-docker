@@ -93,7 +93,9 @@ $ mkdir docker/images/foo
 ```
 
 Then write OpenShift compatibility statements that will add new Docker layers
-over the base image:
+over the base image (see [OpenShift's
+documentation](https://docs.openshift.com/enterprise/3.0/creating_images/guidelines.html#openshift-specific-guidelines)
+to get official guidelines):
 
 ```Dockerfile
 # docker/images/foo/Dockerfile

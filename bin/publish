@@ -25,7 +25,7 @@ function publish() {
         exit 1
     fi
     local service=$1
-    local tag=$(_get_target_image_tag $service)
+    local tag=$(_get_target_image_fullname $service)
 
     echo -e "\033[34m**** PUBLISH PARAMETERS ****"
     echo "Service: ${service}"
