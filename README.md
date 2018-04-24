@@ -66,8 +66,23 @@ The script will automatically look up for a built image tagged with the pattern
 described in the previous section and will push this new image to the DockerHub
 public repository.
 
-> You will need to create a DockerHub account first and log in via the
-> `docker login` command.
+> You will need to create a DockerHub account first and log in via the `docker
+> login` command.
+
+### Continuous Integration and Delivery
+
+To make sure our release process is reproducible, we have automated image build
+and publication using CircleCI.
+
+Our building strategy follows:
+
+1. All services are constantly build when a new pull request is proposed and the
+   related branch merged to `master`.
+2. We publish a new image to DockerHub when the git repository is tagged with a
+   tag matching the following pattern: `<service>-<version>`, _e.g._
+   `nginx-1.13`.
+3. We publish all images to DocherHub when the git repository is tagged with a
+   tag matching the following pattern: `all-<date>`, _e.g._ `all-20180423`.
 
 ## Adding a new service
 
@@ -84,11 +99,9 @@ over the base image:
 # docker/images/foo/Dockerfile
 FROM foo:2.4.12
 
-# Allow foo to be started by a non priviledged user
+# Allow foo to be started by a non privileged user
 RUN chgrp -R 0 /var/run/foo
 ```
-
-And finally don't forget to update the list of available images below.
 
 ### Remarks
 
@@ -97,6 +110,29 @@ And finally don't forget to update the list of available images below.
 * When building an image, the building context is the `docker/images/<service>`
   directory, so if you need to add files to the context (_e.g._ for a `COPY`
   statement), make sure to place them in this directory.
+
+### Publish your image using the CI
+
+Once your image is ready to be published, you are invited to:
+
+1. Update the list of available images in the next section of this document.
+2. Push your feature-branch (you've created a feature branch, right?) to GitHub
+   and open a new pull request (PR).
+3. Look for CI status and wait for a review of your work. If everything went
+   well, proceed to the next step.
+4. Create a new repository on DockerHub under the `fundocker` organization
+   umbrella (it should be named following our image tagging pattern - see
+   above), and give the `bot` team `write` access to this repository.
+5. Tag the repository (see building strategy in the CI/CD section) to publish
+   your image:
+
+```bash
+
+$ git tag nginx-1.13
+$ git push origin --tags
+```
+
+6. Merge your PR.
 
 ## Available images
 

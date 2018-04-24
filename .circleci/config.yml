@@ -1,0 +1,118 @@
+version: 2
+
+jobs:
+  build-all:
+
+    # We use the machine executor, i.e. a VM, not a container
+    machine: true
+
+    steps:
+      - checkout
+
+      - run:
+          name: Ensure we have a clean docker environment
+          command: |
+            docker images "fundocker/openshift*"
+
+      - run:
+          name: Build services images
+          command: |
+            for service in $(ls docker/images); do
+              bin/build $service
+            done
+
+      - run:
+          name: Check build images
+          command: |
+            docker images "fundocker/openshift*"
+
+  publish:
+
+    # We use the machine executor, i.e. a VM, not a container
+    machine: true
+
+    steps:
+      - checkout
+
+      # Login to DockerHub to Publish new images
+      #
+      # Nota bene: you'll need to define the following secrets environment vars
+      # in CircleCI interface:
+      #
+      #   - DOCKER_USER
+      #   - DOCKER_PASS
+      - run:
+          name: Login to DockerHub
+          command: echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+      # We only publish build images upon new git tags with the following
+      # pattern: `service-version`, e.g. `nginx-1.13`
+      - run:
+          name: Build & publish new service release
+          command: |
+            service=$(echo ${CIRCLE_TAG} | sed -r 's/^([A-Za-z0-9]+)-([0-9.]+)/\1/')
+            bin/build $service
+            bin/publish $service
+
+  publish-all:
+
+    # We use the machine executor, i.e. a VM, not a container
+    machine: true
+
+    steps:
+      - checkout
+
+      # Login to DockerHub to Publish new images
+      #
+      # Nota bene: you'll need to define the following secrets environment vars
+      # in CircleCI interface:
+      #
+      #   - DOCKER_USER
+      #   - DOCKER_PASS
+      - run:
+          name: Login to DockerHub
+          command: echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+      # We only publish build images upon new git tags with the following
+      # pattern: `service-version`, e.g. `nginx-1.13`
+      - run:
+          name: Build & publish all services
+          command: |
+            for service in $(ls docker/images); do
+              bin/build $service
+              bin/publish $service
+            done
+
+workflows:
+  version: 2
+
+  openshift-docker:
+    jobs:
+
+      # We always build all services for CI
+      - build-all:
+          filters:
+            tags:
+              only: /.*/
+
+      # We publish a new service release for each tag respecting the following
+      # pattern: <service>-<version>, e.g. nginx-1.13
+      - publish:
+          requires:
+            - build-all
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^(?!all)([A-Za-z0-9]+)-([0-9.]+)/
+
+      # We publish all services for each tag respecting the following pattern:
+      # all-<date>, e.g. all-20180420
+      - publish-all:
+          requires:
+            - build-all
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /^all-(\d{4})([01]+\d+)([0-3]+\d+)/
