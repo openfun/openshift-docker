@@ -28,7 +28,7 @@ function build() {
     local service=$1
     local image_path=$(_get_service_image_path $service)
     local version=$(_get_base_image_tag $service)
-    local tag=$(_get_target_image_tag $service)
+    local tag=$(_get_target_image_fullname $service)
 
     echo -e "\033[34m**** BUILD PARAMETERS ****"
     echo "Service:      $service"
