@@ -27,18 +27,26 @@ function build() {
 
     local service=$1
     local image_path=$(_get_service_image_path $service)
-    local version=$(_get_base_image_tag $service)
+    local now=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
     local tag=$(_get_target_image_fullname $service)
+    local vcf_ref=$(git rev-parse --short HEAD)
+    local version=$(_get_base_image_tag $service)
 
     echo -e "\033[34m**** BUILD PARAMETERS ****"
     echo "Service:      $service"
     echo "Dockerfile:   $image_path"
     echo "Base version: $version"
     echo "Target image: $tag"
+    echo "Build date:   $now"
+    echo "Revision:     $vcf_ref"
     echo -e "**************************\033[0m"
 
     cd $(dirname $image_path) && \
-        docker build -t $tag .
+        docker build -t $tag \
+            --build-arg BUILD_DATE=${now} \
+            --build-arg VCS_REF=${vcf_ref} \
+            --build-arg VERSION=${version} \
+            .
 }
 
 

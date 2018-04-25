@@ -3,6 +3,10 @@
 This repository contains the docker image sources used in FUN's new
 OpenShift-based infrastructure to run Open-edX.
 
+**Build status**
+
+[![CircleCI](https://circleci.com/gh/openfun/openshift-docker/tree/master.svg?style=svg)](https://circleci.com/gh/openfun/openshift-docker/tree/master)
+
 ## Usage
 
 ### Build a service image
@@ -101,6 +105,20 @@ to get official guidelines):
 # docker/images/foo/Dockerfile
 FROM foo:2.4.12
 
+# Build-time metadata as defined at http://label-schema.org
+ARG BUILD_DATE
+ARG VCS_REF
+ARG VERSION
+LABEL org.label-schema.build-date=$BUILD_DATE \
+      org.label-schema.name="openshift-foo" \
+      org.label-schema.description="OpenShift-compatible foo Docker image" \
+      org.label-schema.url="https://github.com/openfun" \
+      org.label-schema.vcs-ref=$VCS_REF \
+      org.label-schema.vcs-url="https://github.com/openfun/openshift-docker" \
+      org.label-schema.vendor="GIP FUN MOOC" \
+      org.label-schema.version=$VERSION \
+      org.label-schema.schema-version="1.0"
+
 # Allow foo to be started by a non privileged user
 RUN chgrp -R 0 /var/run/foo
 ```
@@ -112,12 +130,15 @@ RUN chgrp -R 0 /var/run/foo
 * When building an image, the building context is the `docker/images/<service>`
   directory, so if you need to add files to the context (_e.g._ for a `COPY`
   statement), make sure to place them in this directory.
+* Don't forget to add and update the `LABEL` statement as proposed above to
+  fully qualify your container.
 
 ### Publish your image using the CI
 
 Once your image is ready to be published, you are invited to:
 
-1. Update the list of available images in the next section of this document.
+1. Update the list of available images in the next section of this document
+   (don't forget to add [microbadger](https://microbadger.com) badges).
 2. Push your feature-branch (you've created a feature branch, right?) to GitHub
    and open a new pull request (PR).
 3. Look for CI status and wait for a review of your work. If everything went
@@ -125,16 +146,18 @@ Once your image is ready to be published, you are invited to:
 4. Create a new repository on DockerHub under the `fundocker` organization
    umbrella (it should be named following our image tagging pattern - see
    above), and give the `bot` team `write` access to this repository.
-5. Tag the repository (see building strategy in the CI/CD section) to publish
-   your image:
+5. Merge your PR.
+6. Tag the `master` branch of the repository (see building strategy in the CI/CD
+   section) to publish your image:
 
 ```bash
-
-$ git tag nginx-1.13
+$ git checkout master
+$ git pull --rebase origin master
+# remove your feature branch
+$ git branch -D add-foo
+$ git tag foo-2.4.12
 $ git push origin --tags
 ```
-
-6. Merge your PR.
 
 ## Available images
 
@@ -142,6 +165,10 @@ We maintain a restricted set of OpenShift-compatible images we use in
 production. An exhaustive list of those Docker image follows:
 
 ### `nginx`
+
+[![](https://images.microbadger.com/badges/version/fundocker/openshift-nginx.svg)](https://microbadger.com/images/fundocker/openshift-nginx "Get your own version badge on microbadger.com")
+[![](https://images.microbadger.com/badges/image/fundocker/openshift-nginx.svg)](https://microbadger.com/images/fundocker/openshift-nginx "Get your own image badge on microbadger.com")
+[![](https://images.microbadger.com/badges/commit/fundocker/openshift-nginx:1.13.svg)](https://microbadger.com/images/fundocker/openshift-nginx:1.13 "Get your own commit badge on microbadger.com")
 
 * Source: [Dockerfile](./docker/images/nginx/Dockerfile)
 * Availability:
