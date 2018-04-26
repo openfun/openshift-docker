@@ -78,8 +78,7 @@ jobs:
           name: Login to DockerHub
           command: echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
-      # We only publish build images upon new git tags with the following
-      # pattern: `service-version`, e.g. `nginx-1.13`
+      # We loop on all services to build an up-to-date image and publish it
       - run:
           name: Build & publish all services
           command: |

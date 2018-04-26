@@ -1,7 +1,8 @@
 # OpenShift Docker
 
 This repository contains the docker image sources used in FUN's new
-OpenShift-based infrastructure to run Open-edX.
+OpenShift-based infrastructure to run Open-edX, DjangoCMS and other
+applications.
 
 ## Usage
 
@@ -14,7 +15,7 @@ utility script, _e.g._:
 $ bin/build nginx
 ```
 
-For a target `service`, the `build` script expect a `Dockerfile` and context to
+For a target `service`, the `build` script expects a `Dockerfile` and context to
 be located in a `docker/images/<service>/` directory, _e.g._:
 
 ```
@@ -44,7 +45,7 @@ FROM nginx:1.13
 # ...
 ```
 
-Once the build succeed, you can check image availability _via_:
+Once the build succeeds, you can check image availability _via_:
 
 ```bash
 $ docker images "fundocker/openshift*"
@@ -76,8 +77,8 @@ and publication using CircleCI.
 
 Our building strategy follows:
 
-1. All services are constantly build when a new pull request is proposed and the
-   related branch merged to `master`.
+1. All services are constantly built when a new pull request is proposed and the
+   related branch is merged to `master`.
 2. We publish a new image to DockerHub when the git repository is tagged with a
    tag matching the following pattern: `<service>-<version>`, _e.g._
    `nginx-1.13`.
@@ -139,7 +140,7 @@ $ git push origin --tags
 ## Available images
 
 We maintain a restricted set of OpenShift-compatible images we use in
-production. An exhaustive list of those Docker image follows:
+production. An exhaustive list of those Docker images follows:
 
 ### `nginx`
 
