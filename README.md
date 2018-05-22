@@ -154,6 +154,12 @@ production. An exhaustive list of those Docker images follows:
 * Availability:
   [fundocker/openshift-elasticsearch](https://hub.docker.com/r/fundocker/openshift-elasticsearch/)
 
+### `es-0.90`
+
+* Source: [Dockerfile](./docker/images/es-0.90/Dockerfile)
+* Availability:
+  [fundocker/openshift-es-0.90](https://hub.docker.com/r/fundocker/openshift-es-0.90/)
+
 ## License
 
 This work is released under the MIT License (see [LICENSE](./LICENSE)).
