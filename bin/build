@@ -6,47 +6,54 @@ source "$(dirname "${BASH_SOURCE[0]}")/_utils.sh"
 function usage() {
     declare script_name="$0"
 
-    echo "$script_name [-h|--help] SERVICE"
+    echo "$script_name [-h|--help] IMAGE"
     echo
     echo "Options:"
     echo "  -h|--help      : Display this help message"
     echo
     echo "Arguments:"
-    echo "  SERVICE: the name of the service to build (e.g. nginx)"
+    echo "  IMAGE: the name of the image to build with or without a tag (e.g. nginx, nginx:1.13)."
 }
 
 
-# Build service image
+# Build image
 #
-# Usage: build SERVICE
+# Usage: build IMAGE
 function build() {
-    if [[ -z $1 ]]; then
-        echo "build: service name is missing, see usage."
+    if [[ -z $2 ]]; then
+        echo "build: image tag is missing, see usage."
         exit 1
     fi
 
-    local service=$1
-    local image_path=$(_get_service_image_path $service)
-    local version=$(_get_base_image_tag $service)
-    local tag=$(_get_target_image_fullname $service)
+    if [[ -z $1 ]]; then
+        echo "build: image name is missing, see usage."
+        exit 1
+    fi
+
+    local name=$1
+    local tag=$2
+    _check_image_path $name $tag
+
+    local image_path=$(_get_image_path $name $tag)
+    local fullname=$(_get_target_image_fullname $name $tag)
 
     echo -e "\033[34m**** BUILD PARAMETERS ****"
-    echo "Service:      $service"
+    echo "image:        $name:$tag"
     echo "Dockerfile:   $image_path"
-    echo "Base version: $version"
-    echo "Target image: $tag"
+    echo "Target image: $fullname"
     echo -e "**************************\033[0m"
 
     cd $(dirname $image_path) && \
-        docker build -t $tag .
+        docker build -t $fullname .
+    cd -
 }
 
 
 function main() {
     declare program="$0"
 
-    local service
-
+    local image
+    
     while [[ "$#" -ge "1" ]]; do
         local key="$1"
         shift
@@ -57,13 +64,25 @@ function main() {
                 exit 0
                 ;;
             *)
-                # Check if $key is a service name with a defined Dockerfile
-                _check_service_image_path $key
-                service=$key
+                image=$key
         esac
     done
 
-    build $service
+    local image_array=(${image//:/ })
+
+    if [[ ${#image_array[@]} -eq "2" ]]; then
+        build ${image_array[0]} ${image_array[1]}
+    else
+        if [[ ${#image_array[@]} -eq "1" ]]; then
+            for tag in $(ls docker/images/$image); do
+                build $image $tag
+            done
+        else
+            echo "Not a valid image name (e.g. nginx or nginx:1.13)"
+            exit 1
+        fi
+    fi
+
 }
 
 main "$@"

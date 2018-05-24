@@ -7,84 +7,79 @@ shopt -s expand_aliases
 
 declare DOCKERHUB_NAMESPACE="fundocker"
 declare IMAGE_NAME_PREFIX="openshift-"
-declare BASE_SERVICE_IMAGE_PATH="docker/images"
+declare BASE_IMAGE_PATH="docker/images"
 
 
-function _check_service_argument() {
+function _check_image_arguments() {
     if [[ -z $2 ]]; then
-        echo "$1: service name is missing"
+        echo "$1: image name is missing"
+        exit 1
+    fi
+
+    if [[ -z $3 ]]; then
+        echo "$1: image tag is missing"
         exit 1
     fi
 }
 
 # Avoid repetition by declaring an alias
-alias _check_service_argument='_check_service_argument ${FUNCNAME} $*'
+alias _check_image_arguments='_check_image_arguments ${FUNCNAME} $*'
 
-# Get the Dockerfile path of a service
+# Get the Dockerfile path of an image
 #
-# Usage: _get_service_image_path SERVICE
-function _get_service_image_path() {
-    _check_service_argument
+# Usage: _get_image_path NAME TAG
+function _get_image_path() {
+    _check_image_arguments
 
-    local service=$1
+    local name=$1
+    local tag=$2
 
-    echo "${BASE_SERVICE_IMAGE_PATH}/${service}/Dockerfile"
+    echo "${BASE_IMAGE_PATH}/${name}/${tag}/Dockerfile"
 }
 
 
-# Check that the Dockerfile path of a service actually exists
+# Check that the Dockerfile path of an image actually exists
 #
-# Usage: _check_service_image_path SERVICE
-function _check_service_image_path() {
-    _check_service_argument
+# Usage: _check_image_path NAME TAG
+function _check_image_path() {
+    _check_image_arguments
 
-    local service=$1
-    local service_image_path=$(_get_service_image_path $service)
+    local name=$1
+    local tag=$2
+    local image_path=$(_get_image_path $name $tag)
 
-    if [[ ! -e $service_image_path ]]; then
-        echo "Service image path does not exists: $service_image_path"
+    if [[ ! -e $image_path ]]; then
+        echo "image path does not exist: $image_path"
         exit 1
     fi
 }
 
 
-# Get base image tag (as extracted from the service's Dockerfile tag)
+# Get target image fullname (fully qualified, e.g. namespace/name:tag)
 #
-# Usage: _get_base_image_tag SERVICE
-function _get_base_image_tag() {
-    _check_service_argument
-
-    local service=$1
-    local dockerfile=$(_get_service_image_path $service)
-
-    echo $(grep FROM ${dockerfile} | head -n 1 | sed 's/^.*FROM \(.*\):\(.*\)/\2/')
-}
-
-
-# Get target image tag (fully qualified, e.g. namespace/name:tag)
-#
-# Usage: _get_target_image_fullname SERVICE
+# Usage: _get_target_image_fullname NAME TAG
 function _get_target_image_fullname() {
-    _check_service_argument
+    _check_image_arguments
 
-    local service=$1
-    local tag=$(_get_base_image_tag $service)
-
-    echo "${DOCKERHUB_NAMESPACE}/${IMAGE_NAME_PREFIX}${service}:${tag}"
+    local name=$1
+    local tag=$2
+ 
+    echo "${DOCKERHUB_NAMESPACE}/${IMAGE_NAME_PREFIX}${name}:${tag}"
 }
 
 
 # Check if target image has been built and is available locally
 #
-# Usage: _check_target_image_exists SERVICE
+# Usage: _check_target_image_exists NAME TAG
 function _check_target_image_exists() {
-    _check_service_argument
+    _check_image_arguments
 
-    local service=$1
-    local image=$(_get_target_image_fullname $service)
+    local name=$1
+    local tag=$2
+    local image=$(_get_target_image_fullname $name $tag)
 
-    if ! docker images $tag | grep $service &> /dev/null; then
-        echo "Target image '${image}' does not exists! You should build it first (see: bin/build)"
+    if ! docker images $image | grep $name &> /dev/null; then
+        echo "Target image '${image}' does not exist! You should build it first (see: bin/build)"
         exit 1
     fi
 }
