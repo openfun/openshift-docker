@@ -6,17 +6,25 @@ applications.
 
 ## Usage
 
-### Build a service image
+### Build an image
 
-Building a service Docker image can be achieved thanks to the `bin/build`
+Building a Docker image can be achieved thanks to the `bin/build`
 utility script, _e.g._:
+
+Build a specific image:
+
+```bash
+$ bin/build nginx:1.13
+```
+
+Or build all tags of an image:
 
 ```bash
 $ bin/build nginx
 ```
 
-For a target `service`, the `build` script expects a `Dockerfile` and context to
-be located in a `docker/images/<service>/` directory, _e.g._:
+For a target `image`, the `build` script expects a `Dockerfile` and context to
+be located in a `docker/images/<image_name>/<image_tag>` directory, _e.g._:
 
 ```
 .
@@ -24,25 +32,15 @@ be located in a `docker/images/<service>/` directory, _e.g._:
 ├── docker
 │   └── images
 │       └── nginx
-│           └── Dockerfile
+│           └── 1.13
+│               └── Dockerfile
 └── ...
 ```
 
 The target build image will be automatically tagged with the following pattern:
 
 ```
-fundocker/openshift-<service>:<version>
-```
-
-with `<service>` the service name (_e.g._ `nginx`) and `<version>` the version
-tag of the original service image (_e.g._ `1.13`) extracted from the first
-`FROM` statement of the service's `Dockerfile`, _e.g._:
-
-```Dockerfile
-# docker/images/nginx/Dockerfile
-FROM nginx:1.13
-
-# ...
+fundocker/openshift-<image_name>:<image_tag>
 ```
 
 Once the build succeeds, you can check image availability _via_:
@@ -54,10 +52,18 @@ fundocker/openshift-nginx   1.12                97fa5695dab6        22 hours ago
 fundocker/openshift-nginx   1.13                367a1bb94e8a        23 hours ago        109MB
 ```
 
-### Publish a service image
+### Publish an image
 
 Once built, you can publish your image to [DockerHub](https://hub.docker.com)
 via the `bin/publish` script, _e.g._:
+
+Publish a specific image:
+
+```bash
+$ bin/publish nginx:1.13
+```
+
+Or publish all tags of an image:
 
 ```bash
 $ bin/publish nginx
@@ -77,20 +83,20 @@ and publication using CircleCI.
 
 Our building strategy follows:
 
-1. All services are constantly built when a new pull request is proposed and the
+1. All images are constantly built when a new pull request is proposed and the
    related branch is merged to `master`.
 2. We publish a new image to DockerHub when the git repository is tagged with a
-   tag matching the following pattern: `<service>-<version>`, _e.g._
-   `nginx-1.13`.
+   tag matching the following pattern: `<image_name>[:<image_tag>]`, _e.g._
+   `nginx` or `nginx:1.13`.
 3. We publish all images to DocherHub when the git repository is tagged with a
    tag matching the following pattern: `all-<date>`, _e.g._ `all-20180423`.
 
-## Adding a new service
+## Adding a new image
 
-To add a new service `foo`, create the service directory first:
+To add a new image `foo:bar`, create the image directory first:
 
 ```bash
-$ mkdir docker/images/foo
+$ mkdir docker/images/foo/bar
 ```
 
 Then write OpenShift compatibility statements that will add new Docker layers
@@ -99,8 +105,8 @@ documentation](https://docs.openshift.com/enterprise/3.0/creating_images/guideli
 to get official guidelines):
 
 ```Dockerfile
-# docker/images/foo/Dockerfile
-FROM foo:2.4.12
+# docker/images/foo/bar/Dockerfile
+FROM foo:bar
 
 # Allow foo to be started by a non privileged user
 RUN chgrp -R 0 /var/run/foo
@@ -110,7 +116,7 @@ RUN chgrp -R 0 /var/run/foo
 
 * Always derive your `Dockerfile` from an official image and make sure it is
   still maintained.
-* When building an image, the building context is the `docker/images/<service>`
+* When building an image, the building context is the `docker/images/<image_name>/<image_tag>`
   directory, so if you need to add files to the context (_e.g._ for a `COPY`
   statement), make sure to place them in this directory.
 
@@ -144,21 +150,17 @@ production. An exhaustive list of those Docker images follows:
 
 ### `nginx`
 
-* Source: [Dockerfile](./docker/images/nginx/Dockerfile)
+* Source: [Dockerfile](./docker/images/nginx)
+* Tags: 1.13
 * Availability:
   [fundocker/openshift-nginx](https://hub.docker.com/r/fundocker/openshift-nginx/)
 
 ### `elasticsearch`
 
-* Source: [Dockerfile](./docker/images/elasticsearch/Dockerfile)
+* Source: [Dockerfile](./docker/images/elasticsearch)
+* Tags: 0.9, 6.2.4
 * Availability:
   [fundocker/openshift-elasticsearch](https://hub.docker.com/r/fundocker/openshift-elasticsearch/)
-
-### `es-0.90`
-
-* Source: [Dockerfile](./docker/images/es-0.90/Dockerfile)
-* Availability:
-  [fundocker/openshift-es-0.90](https://hub.docker.com/r/fundocker/openshift-es-0.90/)
 
 ## License
 

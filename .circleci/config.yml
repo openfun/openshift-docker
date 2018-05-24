@@ -51,13 +51,12 @@ jobs:
           command: echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
       # We only publish build images upon new git tags with the following
-      # pattern: `service-version`, e.g. `nginx-1.13`
+      # pattern: <image_name>[:<image_tag>], e.g. nginx or nginx:1.13
       - run:
           name: Build & publish new service release
           command: |
-            service=$(echo ${CIRCLE_TAG} | sed -r 's/^([A-Za-z0-9]+)-([0-9.]+)/\1/')
-            bin/build $service
-            bin/publish $service
+            bin/build ${CIRCLE_TAG}
+            bin/publish ${CIRCLE_TAG}
 
   publish-all:
 
@@ -100,8 +99,8 @@ workflows:
             tags:
               only: /.*/
 
-      # We publish a new service release for each tag respecting the following
-      # pattern: <service>-<version>, e.g. nginx-1.13
+      # We publish new images for each git tag respecting the following
+      # pattern: <image_name>[:<image_tag>], e.g. nginx or nginx:1.13
       - publish:
           requires:
             - build-all
@@ -109,7 +108,7 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: /^(?!all)([A-Za-z0-9]+)-([0-9.]+)/
+              only: /^(?!all)([A-Za-z0-9]+)(?:\:([0-9.]+))?/
 
       # We publish all services for each tag respecting the following pattern:
       # all-<date>, e.g. all-20180420

@@ -12,7 +12,7 @@ function usage() {
     echo "  -h|--help      : Display this help message"
     echo
     echo "Arguments:"
-    echo "  SERVICE: the name of the service to publish (e.g. nginx)"
+    echo "  IMAGE: the name of the image to build with or without a tag (e.g. nginx, nginx:1.13)."
 }
 
 
@@ -20,27 +20,35 @@ function usage() {
 #
 # Usage: publish SERVICE
 function publish() {
-    if [[ -z $1 ]]; then
-        echo "publish: service name is missing, see usage."
+    if [[ -z $2 ]]; then
+        echo "publish: image tag is missing, see usage."
         exit 1
     fi
-    local service=$1
-    local tag=$(_get_target_image_fullname $service)
+
+    if [[ -z $1 ]]; then
+        echo "publish: image name is missing, see usage."
+        exit 1
+    fi
+
+    local name=$1
+    local tag=$2
+    _check_image_path $name $tag
+
+    local fullname=$(_get_target_image_fullname $name $tag)
+    _check_target_image_exists $name $tag
 
     echo -e "\033[34m**** PUBLISH PARAMETERS ****"
-    echo "Service: ${service}"
-    echo "Image:   ${tag}"
+    echo "Target image: ${fullname}"
     echo -e "**************************\033[0m"
 
-    _check_target_image_exists $service
-    docker push $tag
+    docker push $fullname
 }
 
 
 function main() {
     declare program="$0"
 
-    local service
+    local image
 
     while [[ "$#" -ge "1" ]]; do
         local key="$1"
@@ -52,13 +60,25 @@ function main() {
                 exit 0
                 ;;
             *)
-                # Check if $key is a service name with a defined Dockerfile
-                _check_service_image_path $key
-                service=$key
+                image=$key
         esac
     done
 
-    publish $service
+    local image_array=(${image//:/ })
+
+    if [[ ${#image_array[@]} -eq "2" ]]; then
+        publish ${image_array[0]} ${image_array[1]}
+    else
+        if [[ ${#image_array[@]} -eq "1" ]]; then
+            for tag in $(ls docker/images/$image); do
+                publish $image $tag
+            done
+        else
+            echo "Not a valid image name (e.g. nginx or nginx:1.13)"
+            exit 1
+        fi
+    fi
+
 }
 
 main "$@"
