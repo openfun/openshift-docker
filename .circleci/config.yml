@@ -100,7 +100,7 @@ workflows:
               only: /.*/
 
       # We publish new images for each git tag respecting the following
-      # pattern: <image_name>[:<image_tag>], e.g. nginx or nginx:1.13
+      # pattern: <image_name>[-<image_tag>], e.g. nginx or nginx-1.13
       - publish:
           requires:
             - build-all
@@ -108,7 +108,7 @@ workflows:
             branches:
               ignore: /.*/
             tags:
-              only: /^(?!all)([A-Za-z0-9]+)(?:\:([0-9.]+))?/
+              only: /^(?!all)([A-Za-z0-9]+)(?:-([0-9.]+))?/
 
       # We publish all services for each tag respecting the following pattern:
       # all-<date>, e.g. all-20180420
