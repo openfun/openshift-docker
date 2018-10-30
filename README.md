@@ -86,8 +86,8 @@ Our building strategy follows:
 1. All images are constantly built when a new pull request is proposed and the
    related branch is merged to `master`.
 2. We publish a new image to DockerHub when the git repository is tagged with a
-   tag matching the following pattern: `<image_name>[:<image_tag>]`, _e.g._
-   `nginx` or `nginx:1.13`.
+   tag matching the following pattern: `<image_name>[-<image_tag>]`, _e.g._
+   `nginx` or `nginx-1.13`.
 3. We publish all images to DocherHub when the git repository is tagged with a
    tag matching the following pattern: `all-<date>`, _e.g._ `all-20180423`.
 
