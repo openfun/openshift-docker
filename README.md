@@ -150,15 +150,15 @@ production. An exhaustive list of those Docker images follows:
 
 ### `nginx`
 
-* Source: [Dockerfile](./docker/images/nginx)
-* Tags: 1.13
+* Library: [docker/images/nginx](./docker/images/nginx)
+* Tags: [`1.13`](docker/images/nginx/1.13/Dockerfile)
 * Availability:
   [fundocker/openshift-nginx](https://hub.docker.com/r/fundocker/openshift-nginx/)
 
 ### `elasticsearch`
 
-* Source: [Dockerfile](./docker/images/elasticsearch)
-* Tags: 0.9, 1.5.2, 6.2.4, 6.3.0, 6.3.1
+* Library: [docker/images/elasticsearch](./docker/images/elasticsearch)
+* Tags: [`0.9`](docker/images/elasticsearch/0.90/Dockerfile), [`1.5.2`](docker/images/elasticsearch/1.5.2/Dockerfile), [`6.2.4`](docker/images/elasticsearch/6.2.4/Dockerfile), [`6.3.0`](docker/images/elasticsearch/6.3.0/Dockerfile), [`6.3.1`](docker/images/elasticsearch/6.3.1/Dockerfile)
 * Availability:
   [fundocker/openshift-elasticsearch](https://hub.docker.com/r/fundocker/openshift-elasticsearch/)
 
