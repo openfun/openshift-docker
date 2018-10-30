@@ -51,12 +51,14 @@ jobs:
           command: echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
       # We only publish build images upon new git tags with the following
-      # pattern: <image_name>[:<image_tag>], e.g. nginx or nginx:1.13
+      # pattern: <image_name>[-<image_tag>], e.g. nginx or nginx-1.13
       - run:
           name: Build & publish new service release
           command: |
-            bin/build ${CIRCLE_TAG}
-            bin/publish ${CIRCLE_TAG}
+            target_image=${CIRCLE_TAG//-/:}
+            echo "Will build & publish image: ${target_image}"
+            bin/build ${target_image}
+            bin/publish ${target_image}
 
   publish-all:
 
