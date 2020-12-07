@@ -158,10 +158,12 @@ production. An exhaustive list of those Docker images follows:
 ### `elasticsearch`
 
 * Library: [docker/images/elasticsearch](./docker/images/elasticsearch)
-* Tags: [`0.9`](docker/images/elasticsearch/0.90/Dockerfile), [`1.5.2`](docker/images/elasticsearch/1.5.2/Dockerfile),
-  [`5.6.16`](docker/images/elasticsearch/5.6.16/Dockerfile), [`6.2.4`](docker/images/elasticsearch/6.2.4/Dockerfile),
+* Tags: [`5.6.16`](docker/images/elasticsearch/5.6.16/Dockerfile), [`6.2.4`](docker/images/elasticsearch/6.2.4/Dockerfile),
   [`6.3.0`](docker/images/elasticsearch/6.3.0/Dockerfile), [`6.3.1`](docker/images/elasticsearch/6.3.1/Dockerfile),
   [`6.6.0`](docker/images/elasticsearch/6.6.0/Dockerfile), [`6.6.2`](docker/images/elasticsearch/6.6.2/Dockerfile)
+* Tags removed from this repository but available on Docker Hub :
+  [`0.9`](https://hub.docker.com/layers/fundocker/openshift-elasticsearch/0.90/images/sha256-b282cd8bada9f7478736209077762a2e4bd0aa2297e1a20183ad2d1bf22f9369),
+  [`1.5.2`](https://hub.docker.com/layers/fundocker/openshift-elasticsearch/1.5.2/images/sha256-c524a5a87e1bf287d81ad4d31b3539c70d8b4afec29eb6f77a112eb07ebbba65)
 * Availability:
   [fundocker/openshift-elasticsearch](https://hub.docker.com/r/fundocker/openshift-elasticsearch/)
 
